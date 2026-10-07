@@ -7,6 +7,8 @@ namespace Study3D.MiniGolf
 {
     public class GolfPlayer : MonoBehaviour
     {
+        [SerializeField] private float fastTimeScale = 3f;
+        
         [Header("Settings")]
         public float minPower;
         public float maxPower;
@@ -33,26 +35,43 @@ namespace Study3D.MiniGolf
 
             bool canShoot = ball.IsStopped;
 
+            // 시간 배속은 발사 가능 여부와 무관하게 처리
+            if (SimpleInput.GetKey(Key.Space))
+            {
+                Time.timeScale = fastTimeScale;
+            }
+            else if (SimpleInput.GetKeyUp(Key.Space))
+            {
+                Time.timeScale = 1f;
+            }
+
+
+// 발사 입력은 공이 멈춰 있을 때만 처리
             if (canShoot)
             {
-                if (SimpleInput.GetKey(Key.Space)) // power charge
+                if (SimpleInput.GetKey(Key.Space))
                 {
-                    chargeTime += Time.deltaTime;
-                    // PingPong 함수를 사용해서 왔다리 갔다리 하는 표현을 해줍시다.
+                    chargeTime += Time.unscaledDeltaTime;
                     power01 = Mathf.PingPong(chargeTime / cycleTime, 1);
                 }
-                else if (SimpleInput.GetKeyUp(Key.Space)) // 입력 전달
+                else if (SimpleInput.GetKeyUp(Key.Space))
                 {
                     float power = Mathf.Lerp(minPower, maxPower, power01);
                     ball.Shoot(aimDirection, power);
-                    chargeTime = 0.0f;
-                    power01 = 0.0f;
+
+                    chargeTime = 0f;
+                    power01 = 0f;
                 }
             }
             
             UpdateFeedback(aimDirection, canShoot);
         }
 
+        private void OnDisable()
+        {
+            Time.timeScale = 1f;
+        }
+        
         // 보통 플레이어의 입력정보들에 관련된 UI나 피드백들은
         // 하나의 함수로 모아두는게 좋습니다. (찢지 마세여)
         // (생각외로 엄청 많이 바뀜)
