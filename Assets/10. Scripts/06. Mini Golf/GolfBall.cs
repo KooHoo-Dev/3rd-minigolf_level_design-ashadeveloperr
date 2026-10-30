@@ -7,6 +7,10 @@ namespace Study3D.MiniGolf
     
     public class GolfBall : MonoBehaviour
     {
+        [Header("Fall Respawn")]
+        [SerializeField] private float fallY = -1f;
+        [SerializeField] private float respawnYOffset = 0.5f;
+        
         [Header("Settings")] 
         public float stopSpeed = 0.1f;
         public float stopDelay = 0.3f;
@@ -43,6 +47,21 @@ namespace Study3D.MiniGolf
                 slowTime += Time.fixedDeltaTime;
             else
                 slowTime = 0;
+
+            // 낙하 판정
+            if (transform.position.y < fallY)
+            {
+                Respawn();
+            }
+        }
+        
+        private void Respawn()
+        {
+            Vector3 respawnPosition = lastPosition + Vector3.up * respawnYOffset;
+
+            Teleport(respawnPosition);
+
+            slowTime = stopDelay;
         }
 
         // 외부에서 Shoot함수를 호출하여 동작하도록 함수를 public으로 선언합니다
@@ -71,9 +90,9 @@ namespace Study3D.MiniGolf
         }
 
         // public으로 선언해서 외부에서 호출 할 수 있도록 해줍니다.
-        public void ReturnToLasShotPosition()
+        public void ReturnToLastShotPosition()
         {
-            Teleport(lastPosition);
+            Teleport(lastPosition + Vector3.up * respawnYOffset);
         }
 
         // 스테이지 시작시 공을 놓기 위한 함수
